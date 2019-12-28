@@ -18,7 +18,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import tinkoff.demo.domain.ApplicationModel;
+import tinkoff.demo.exceptions.ApplicationNotFoundException;
 import tinkoff.demo.repository.ApplicationRepository;
+import tinkoff.demo.service.ApplicationService;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -49,6 +51,9 @@ public class EndPointTest {
 
     @Autowired
     private ApplicationRepository applicationRepository;
+
+    @Autowired
+    private ApplicationService applicationService;
 
     @SneakyThrows
     @Before
@@ -94,6 +99,10 @@ public class EndPointTest {
        Assertions.assertThat(resultModel).isEqualToComparingFieldByField(applicationModelLast);
     }
 
+    @Test(expected = ApplicationNotFoundException.class)
+    public void applicationAbsenceTest() throws Exception  {
+        applicationService.getApplicationModelById(new BigInteger("0000"));
+    }
 
 
 
