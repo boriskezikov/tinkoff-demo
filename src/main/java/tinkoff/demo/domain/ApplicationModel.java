@@ -3,10 +3,7 @@ package tinkoff.demo.domain;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 
@@ -16,7 +13,7 @@ import java.sql.Timestamp;
 public class ApplicationModel {
 
     @Id
-    @Column(name="application_id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger applicationId;
 
     @Column(name="crt_date")
