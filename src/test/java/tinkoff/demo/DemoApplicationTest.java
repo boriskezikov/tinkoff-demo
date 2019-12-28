@@ -3,14 +3,13 @@ package tinkoff.demo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -21,20 +20,21 @@ import tinkoff.demo.domain.ApplicationModel;
 import tinkoff.demo.exceptions.ApplicationNotFoundException;
 import tinkoff.demo.repository.ApplicationRepository;
 import tinkoff.demo.service.ApplicationService;
+import wiremock.org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 
-@SpringBootTest()
+@SpringBootTest
 @WebAppConfiguration
-@RunWith(SpringJUnit4ClassRunner.class)
-public class EndPointTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class DemoApplicationTest {
 
     private MockMvc mvc;
     private ApplicationModel applicationModel = new ApplicationModel();
@@ -55,36 +55,21 @@ public class EndPointTest {
     @Autowired
     private ApplicationService applicationService;
 
+
     @SneakyThrows
-    @Before
+    @BeforeAll
     public void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        applicationModel.setContactId(CONTACT_ID_TEST);
-        applicationModel.setProductName(PRODUCT1_NAME_TEST);
-        applicationModel.setApplicationId(new BigInteger("1"));
-        applicationModel.setCrtDate(new Timestamp(System.currentTimeMillis()));
-
-        TimeUnit.SECONDS.sleep(2);
-
-        applicationModelLast.setContactId(CONTACT_ID_TEST);
-        applicationModelLast.setProductName(PRODUCT2_NAME_TEST);
-        applicationModelLast.setApplicationId(new BigInteger("1"));
-        applicationModelLast.setCrtDate(new Timestamp(System.currentTimeMillis()));
-
-        applicationRepository.save(applicationModel);
-        applicationRepository.save(applicationModelLast);
-
+        var pair = givenApplicationModel();
+        applicationRepository.save(pair.left);
+        applicationRepository.save(pair.right);
     }
 
-    @After
+    @AfterAll
     public void tearDown() {
         applicationRepository.deleteAll();
     }
 
-
-    /*
-        Checking if returned result equals to the last application saved.
-     */
 
     @Test
     public void getLastApplication() throws Exception {
@@ -94,16 +79,33 @@ public class EndPointTest {
                 .andDo(print())
                 .andReturn();
 
-       String json = mvcResult.getResponse().getContentAsString();
-       ApplicationModel resultModel = objectMapper.readValue(json, ApplicationModel.class);
+       var json = mvcResult.getResponse().getContentAsString();
+       var resultModel = objectMapper.readValue(json, ApplicationModel.class);
        Assertions.assertThat(resultModel).isEqualToComparingFieldByField(applicationModelLast);
     }
 
-    @Test(expected = ApplicationNotFoundException.class)
-    public void applicationAbsenceTest() throws Exception  {
-        applicationService.getApplicationModelById(new BigInteger("0000"));
+    @Test
+    public void applicationAbsenceTest()  {
+        assertThrows(ApplicationNotFoundException.class, () -> applicationService.getApplicationModelById(new BigInteger("0000")));
+    }
+
+    private ImmutablePair<ApplicationModel, ApplicationModel> givenApplicationModel() {
+
+        applicationModel.setContactId(CONTACT_ID_TEST);
+        applicationModel.setProductName(PRODUCT1_NAME_TEST);
+        applicationModel.setApplicationId(new BigInteger("1"));
+        applicationModel.setCrtDate(new Timestamp(System.currentTimeMillis()));
+
+        applicationModelLast.setContactId(CONTACT_ID_TEST);
+        applicationModelLast.setProductName(PRODUCT2_NAME_TEST);
+        applicationModelLast.setApplicationId(new BigInteger("2"));
+        applicationModelLast.setCrtDate(new Timestamp(System.currentTimeMillis() * 2));
+
+        return ImmutablePair.of(applicationModel, applicationModelLast);
+    }
+
     }
 
 
 
-}
+

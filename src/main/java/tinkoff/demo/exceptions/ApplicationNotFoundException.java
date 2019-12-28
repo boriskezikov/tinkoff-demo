@@ -15,6 +15,7 @@ public class ApplicationNotFoundException extends TinkoffBusinessAPIException {
     public ApplicationNotFoundException(String message) {
         super(message);
     }
+
     public ApplicationNotFoundException(BigInteger id) {
         super(NOT_FOUND_MESSAGE + id);
     }

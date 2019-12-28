@@ -16,13 +16,13 @@ public class ApplicationModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger applicationId;
 
-    @Column(name="crt_date")
+    @Column(name = "crt_date")
     private Timestamp crtDate;
 
-    @Column(name="product_name")
+    @Column(name = "product_name")
     private String productName;
 
-    @Column(name="contact_id")
+    @Column(name = "contact_id")
     private BigInteger contactId;
 
 }
