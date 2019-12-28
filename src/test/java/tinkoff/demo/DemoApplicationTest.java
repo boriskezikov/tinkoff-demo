@@ -10,6 +10,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -17,9 +19,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import tinkoff.demo.domain.ApplicationModel;
-import tinkoff.demo.exceptions.ApplicationNotFoundException;
 import tinkoff.demo.repository.ApplicationRepository;
 import tinkoff.demo.service.ApplicationService;
+import tinkoff.demo.utils.ApplicationNotFoundException;
 import wiremock.org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.math.BigInteger;
@@ -30,11 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-
 @SpringBootTest
 @WebAppConfiguration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DemoApplicationTest {
+class DemoApplicationTest {
 
     private MockMvc mvc;
     private ApplicationModel applicationModel = new ApplicationModel();
@@ -58,7 +59,7 @@ public class DemoApplicationTest {
 
     @SneakyThrows
     @BeforeAll
-    public void setUp() {
+    void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(wac).build();
         var pair = givenApplicationModel();
         applicationRepository.save(pair.left);
@@ -66,28 +67,44 @@ public class DemoApplicationTest {
     }
 
     @AfterAll
-    public void tearDown() {
+    void tearDown() {
         applicationRepository.deleteAll();
     }
 
 
     @Test
-    public void getLastApplication() throws Exception {
+    void getLastApplication() throws Exception {
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(URL + CONTACT_ID_TEST)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
 
-       var json = mvcResult.getResponse().getContentAsString();
-       var resultModel = objectMapper.readValue(json, ApplicationModel.class);
-       Assertions.assertThat(resultModel).isEqualToComparingFieldByField(applicationModelLast);
+        var json = mvcResult.getResponse().getContentAsString();
+        var resultModel = objectMapper.readValue(json, ApplicationModel.class);
+        Assertions.assertThat(resultModel).isEqualToComparingFieldByField(applicationModelLast);
     }
 
     @Test
-    public void applicationAbsenceTest()  {
+    void applicationAbsenceTest() {
         assertThrows(ApplicationNotFoundException.class, () -> applicationService.getApplicationModelById(new BigInteger("0000")));
     }
+
+    @Test
+    void serviceTest() {
+        var res = applicationService.getApplicationModelById(new BigInteger("1234"));
+        Assertions.assertThat(res.getProductName()).isEqualTo((PRODUCT2_NAME_TEST));
+    }
+
+    @Test
+    void dbTest(){
+        String h2 = "jdbc:h2:mem:testdb";
+        var ds = new DriverManagerDataSource(h2,"sa",null);
+        JdbcTemplate jdbc = new JdbcTemplate(ds);
+        Assertions.assertThat(
+                jdbc.queryForObject("SELECT COUNT (*) FROM INFORMATION_SCHEMA.USERS ", Integer.class)).isGreaterThan(0);
+    }
+
 
     private ImmutablePair<ApplicationModel, ApplicationModel> givenApplicationModel() {
 
@@ -104,7 +121,7 @@ public class DemoApplicationTest {
         return ImmutablePair.of(applicationModel, applicationModelLast);
     }
 
-    }
+}
 
 
 

@@ -1,4 +1,4 @@
-package tinkoff.demo.exceptions;
+package tinkoff.demo.utils;
 
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;

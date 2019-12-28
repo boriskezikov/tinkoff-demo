@@ -1,4 +1,4 @@
-package tinkoff.demo.exceptions;
+package tinkoff.demo.utils;
 
 public interface Messages {
     String NOT_FOUND_MESSAGE = "No applications found for id = ";

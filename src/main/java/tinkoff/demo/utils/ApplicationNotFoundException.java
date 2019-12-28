@@ -1,4 +1,4 @@
-package tinkoff.demo.exceptions;
+package tinkoff.demo.utils;
 
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.math.BigInteger;
 
-import static tinkoff.demo.exceptions.Messages.NOT_FOUND_MESSAGE;
+import static tinkoff.demo.utils.Messages.NOT_FOUND_MESSAGE;
 
 @NoArgsConstructor
 @ResponseStatus(code = HttpStatus.NOT_FOUND)
