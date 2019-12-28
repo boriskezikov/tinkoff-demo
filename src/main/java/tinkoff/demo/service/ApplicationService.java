@@ -14,6 +14,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
+import static tinkoff.demo.exceptions.Messages.EMPTY_RESULT;
+import static tinkoff.demo.exceptions.Messages.H2_ERROR_MESSAGE;
+
 
 @Service
 public class ApplicationService {
@@ -33,7 +36,7 @@ public class ApplicationService {
             });
         }
         catch (JdbcSQLException | IOException ex) {
-            throw new TinkoffBusinessAPIException("Error connecting to H2" + ex.getMessage());
+            throw new TinkoffBusinessAPIException(H2_ERROR_MESSAGE + ex.getMessage());
         }
 
     }
@@ -42,7 +45,7 @@ public class ApplicationService {
     public List<ApplicationModel> getAll(){
         List<ApplicationModel> apps =  repo.findAll();
         if (apps.isEmpty()){
-            throw new ApplicationNotFoundException("Dataset is empty");
+            throw new ApplicationNotFoundException(EMPTY_RESULT);
         }
         return apps;
     }
