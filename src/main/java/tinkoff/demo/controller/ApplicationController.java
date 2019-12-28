@@ -21,6 +21,7 @@ public class ApplicationController {
     If  Accept = 'application/xml' header sent, then xml representation returns;
     Else json as default.
      */
+
     @GetMapping(value = "{id}")
     public ApplicationModel getLastApplication(@PathVariable BigInteger id) {
         return service.getApplicationModelById(id);

@@ -105,7 +105,6 @@ class DemoApplicationTest {
                 jdbc.queryForObject("SELECT COUNT (*) FROM INFORMATION_SCHEMA.USERS ", Integer.class)).isGreaterThan(0);
     }
 
-
     private ImmutablePair<ApplicationModel, ApplicationModel> givenApplicationModel() {
 
         applicationModel.setContactId(CONTACT_ID_TEST);

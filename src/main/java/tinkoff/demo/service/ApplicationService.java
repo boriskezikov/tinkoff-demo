@@ -37,7 +37,7 @@ public class ApplicationService {
 
 
     public List<ApplicationModel> getAll(){
-        List<ApplicationModel> apps =  repo.findAll();
+        var apps =  repo.findAll();
         if (apps.isEmpty()){
             throw new ApplicationNotFoundException(EMPTY_RESULT);
         }
